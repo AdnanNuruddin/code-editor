@@ -88,6 +88,12 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file('code_editor_key.keystore')
+            storePassword '123456'
+            keyAlias 'CodeEditor'
+            keyPassword '123456'
+        }        
     }
     buildTypes {
         debug {
