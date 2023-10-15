@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import CodeEditor, { CodeEditorSyntaxStyles } from '@rivascva/react-native-code-editor';
 import { TouchableOpacity } from 'react-native';
 import cppKeywordsByUsage from './cppKeyWords';
+import LoadHtmlView from './LoadHtmlView';
 
 const Editor = (): JSX.Element => {
 
@@ -100,8 +101,8 @@ const Editor = (): JSX.Element => {
 function App(): JSX.Element {
 	return (
 		<SafeAreaView style={{ flex: 1 }}>
-			<Editor />
-			{/* <LocalHtmlView /> */}
+			{/* <Editor /> */}
+			<LoadHtmlView />
 		</SafeAreaView>
 	);
 }

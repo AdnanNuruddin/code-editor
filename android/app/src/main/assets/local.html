@@ -1,18 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <style>
+        /* Styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .modal-content {
+            background-color: #000;
+            text-align: left;
+            min-height: 250px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            font-family: monospace;
+            color: #fff;
+            margin-top: 0;
+        }
+
+        /* Styles for the shell div */
+        .shell {
+            background-color: black;
+            color: white;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 5px;
+            padding-top: 40px;
+        }
+
+        #codeInput {
+            background: black;
+            border: none;
+            caret-color: white;
+            width: 100%;
+            outline: none;
+            color: white;
+            font-family: monospace;
+        }
+
+        /* Styles for normal output */
+        .output {
+            color: white;
+        }
+
+        /* Styles for error messages */
+        .error {
+            color: #FF0000;
+            /* Red color for errors */
+        }
+
+        /* Styles for success messages */
+        .success {
+            color: #00FF00;
+            /* Green color for success */
+        }
+    </style>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
 </head>
-<body>
-    <h1>
-        WOOOOOOOW
-    </h1>
-    <hr>
-    <h2>
-        IS THIS WORKING?? 1
-    </h2>
+
+<body style="margin: 0;max-width: 100%;">
+    <div
+        style="height: 50px; padding-left: 10px; padding-right: 10px; background-color: #1e1e1e; color: white; display: flex; justify-content: space-between;">
+        <h4 style="text-align: left; font-family: 'Courier New', Courier, monospace;">Code Editor</h4>
+        <h4 style="text-align: left; font-family: 'Courier New', Courier, monospace;">
+            <a onclick="submitCode()" style="color: white;" href="#">RUN</a>
+            <a onclick="clearEditor()" style="color: white; margin-left: 5px;" href="#">CLEAR</a>
+        </h4>
+    </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" class="close">&times;</span>
+            <h4 class="header" Header>Output</h4>
+            <div class="shell">
+                <div id="codeOutput" class="output"></div>
+                <div id="codeError" class="error"></div>
+                <div id="codeSuccess" class="success"></div>
+                <form onsubmit="return sendInput(event)">
+                    <input autocomplete="off" id="codeInput" type="text">
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="editor-container" style="height: calc( 100vh - 50px );"></div>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+    <script>
+        let socket;
+        try {
+            socket = new WebSocket('wss://code.jomakhata.com/wss');
+        } catch (error) {
+            alert(error);
+        }
+
+        socket.onopen = (event) => {
+            console.log('Connected to socket server');
+        };
+
+        var editor;
+        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            monaco.languages.register({ id: 'cpp' });
+            monaco.languages.setLanguageConfiguration('cpp', {
+                comments: { lineComment: '//', blockComment: ['/*', '*/'] },
+                brackets: [['{', '}'], ['[', ']'], ['(', ')']],
+            });
+
+            // Define your list of keywords
+            var keywords = [
+                "include",
+                "int",
+                "void",
+                "main",
+                "cin",
+                "cout",
+                "endl",
+                "if",
+                "else",
+                "for",
+                "while",
+                "return",
+                "const",
+                "class",
+                "public",
+                "private",
+                "protected",
+                "struct",
+                "new",
+                "delete",
+                "switch",
+                "case",
+                "break",
+                "continue",
+                "bool",
+                "true",
+                "false",
+                "typedef",
+                "enum",
+                "namespace",
+                "template",
+                "try",
+                "catch",
+                "throw",
+                "virtual",
+                "static",
+                "friend",
+                "const_cast",
+                "dynamic_cast",
+                "reinterpret_cast",
+                "static_cast",
+                "operator",
+                "sizeof",
+                "auto",
+                "nullptr",
+                "volatile",
+                "register",
+                "extern",
+                "union",
+                "volatile",
+                "mutable",
+                "default",
+                "inline",
+                "explicit",
+                "co_await",
+                "co_return",
+                "co_yield",
+                "noexcept",
+                "alignas",
+                "alignof",
+                "asm",
+                "atomic_cancel",
+                "atomic_commit",
+                "atomic_noexcept",
+                "char",
+                "short",
+                "long",
+                "double",
+                "float",
+                "wchar_t",
+                "char8_t",
+                "char16_t",
+                "char32_t",
+                "char",
+                "unsigned",
+                "signed",
+                "typeid",
+                "typename",
+                "constexpr",
+                "decltype",
+                "concept",
+                "consteval",
+                "constinit",
+                "synchronized",
+                "using",
+                "thread_local",
+                "requires",
+                "export",
+                "mutable",
+                "bitand",
+                "bitor",
+                "not",
+                "and",
+                "or",
+                "not_eq",
+                "and_eq",
+                "or_eq",
+                "xor",
+                "xor_eq"
+            ];
+
+            // This array represents an estimation of the most commonly used C++ keywords.
+
+
+            monaco.languages.registerCompletionItemProvider('cpp', {
+                provideCompletionItems: function (model, position) {
+                    var word = model.getWordUntilPosition(position);
+                    var range = {
+                        startLineNumber: position.lineNumber,
+                        startColumn: word.startColumn,
+                        endLineNumber: position.lineNumber,
+                        endColumn: word.endColumn
+                    };
+                    return {
+                        suggestions: keywords
+                            .filter(keyword => keyword.startsWith(word.word))
+                            .map(keyword => ({
+                                label: keyword,
+                                kind: monaco.languages.CompletionItemKind.Keyword,
+                                insertText: keyword,
+                                range: range
+                            })),
+                    };
+                },
+            });
+
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: '// Write your code here\n',
+                language: 'cpp',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                scrollbar: {
+                    // Subtle shadows to the left & top. Defaults to true.
+                    useShadows: false,
+                    // Render vertical arrows. Defaults to false.
+                    verticalHasArrows: true,
+                    // Render horizontal arrows. Defaults to false.
+                    horizontalHasArrows: true,
+                    // Render vertical scrollbar.
+                    // Accepted values: 'auto', 'visible', 'hidden'.
+                    // Defaults to 'auto'
+                    vertical: "visible",
+                    // Render horizontal scrollbar.
+                    // Accepted values: 'auto', 'visible', 'hidden'.
+                    // Defaults to 'auto'
+                    horizontal: "visible",
+                    verticalScrollbarSize: 10,
+                    horizontalScrollbarSize: 17,
+                    arrowSize: 30
+                }
+            });
+        });
+
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+
+        const submitCode = async () => {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'block';
+            document.getElementById('codeSuccess').innerHTML = '';
+            document.getElementById('codeOutput').innerHTML = '';
+            document.getElementById('codeError').innerHTML = '';
+            document.getElementById('codeInput').style.display = 'block';
+
+            socket.send(JSON.stringify({ code: editor.getValue() }));
+        };
+
+        const clearEditor = async () => {
+            editor.setValue('// Write your code here\n');
+        };
+
+        socket.onmessage = (event) => {
+            console.log(event.data);
+            let responseData = JSON.parse(event.data);
+            if (responseData.closed) {
+                responseData.output = responseData.output.replace(/\n/g, '<br>');
+                document.getElementById('codeInput').style.display = 'none';
+                document.getElementById('codeSuccess').innerHTML = document.getElementById('codeSuccess').innerHTML + '<span>' + responseData.output + '</span>';
+            }
+            else if (responseData.output) {
+                responseData.output = responseData.output.replace(/\n/g, '<br>');
+                document.getElementById('codeOutput').innerHTML = document.getElementById('codeOutput').innerHTML + '<span>' + responseData.output + '</span>';
+            }
+            else if (responseData.error) {
+                responseData.error = responseData.error.replace(/\n/g, '<br>');
+                document.getElementById('codeInput').style.display = 'none';
+                document.getElementById('codeError').innerHTML = document.getElementById('codeError').innerHTML + '<span>' + responseData.error + '</span>';
+            };
+        }
+
+        function sendInput() {
+            document.getElementById('codeOutput').innerHTML = document.getElementById('codeOutput').innerHTML + '<span>' + document.getElementById('codeInput').value + '</span><br>';
+            socket.send(JSON.stringify({ input: document.getElementById('codeInput').value }));
+            document.getElementById('codeInput').value = '';
+            return false;
+        }
+    </script>
 </body>
+
 </html>
