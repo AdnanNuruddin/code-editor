@@ -12,20 +12,31 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            z-index: 10;
+            z-index: 15;
+        }
+
+        table button {
+            background-color: #3c3c3c;
+            color: white;
+            font-weight: 100;
+            border: none;
+            font-size: 15px;
+            font-family: monospace;
+            width: 100%;
+            height: 100%;
         }
 
         .modal-content {
             background-color: #000;
             text-align: left;
-            min-height: 250px;
+            min-height: 100vh;
         }
 
         .close {
             position: absolute;
-            top: 10px;
+            top: 0px;
             right: 10px;
-            font-size: 20px;
+            font-size: 30px;
             cursor: pointer;
             color: #fff;
         }
@@ -48,6 +59,7 @@
             padding: 10px;
             border-radius: 5px;
             padding-top: 40px;
+            min-height: 80vh;
         }
 
         #codeInput {
@@ -76,6 +88,50 @@
             color: #00FF00;
             /* Green color for success */
         }
+
+        .action-buttons {
+            color: white;
+            margin-left: 5px;
+            text-decoration: none;
+        }
+    </style>
+
+    <style>
+        /* Style the dropdown button */
+        .dropbtn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Content (hidden by default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            right: 0;
+            background-color: #3c3c3c;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: white;
+            font-size: 14px;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -86,26 +142,83 @@
         style="height: 50px; padding-left: 10px; padding-right: 10px; background-color: #1e1e1e; color: white; display: flex; justify-content: space-between;">
         <h4 style="text-align: left; font-family: 'Courier New', Courier, monospace;">Code Editor</h4>
         <h4 style="text-align: left; font-family: 'Courier New', Courier, monospace;">
-            <a onclick="submitCode()" style="color: white;" href="#">RUN</a>
-            <a onclick="clearEditor()" style="color: white; margin-left: 5px;" href="#">CLEAR</a>
+            <a onclick="submitCode()" class="action-buttons" href=" #">RUN</a>
+            <div class="dropdown">
+                <a id="menuButton" class="action-buttons" href="#">MENU</a>
+                <div id="menuContent" class="dropdown-content">
+                    <a onclick="clearEditor()" href="#">CLEAR EDITOR</a>
+                    <a id="formatCodeButton" onclick="formatCode()" href="#">FORMAT CODE</a>
+                </div>
+            </div>
         </h4>
     </div>
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span onclick="closeModal()" class="close">&times;</span>
-            <h4 class="header" Header>Output</h4>
-            <div class="shell">
+            <h4 class="header" Header>Compilation result: </h4>
+            <div id="shellOutput" class="shell">
                 <div id="codeOutput" class="output"></div>
                 <div id="codeError" class="error"></div>
                 <div id="codeSuccess" class="success"></div>
-                <form onsubmit="return sendInput(event)">
+                <form style="width: 100%;" onsubmit="return sendInput(event)">
                     <input autocomplete="off" id="codeInput" type="text">
                 </form>
             </div>
         </div>
     </div>
-    <div id="editor-container" style="height: calc( 100vh - 50px );"></div>
-    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
+    <div id="editor-container" style="background: #1e1e1e;height: calc( 100vh - 120px );"></div>
+    <div id="button_set" style="height: 70px;">
+        <table
+            style="text-align: center; font-weight: bold; font-size: 14; color: white;background-color:#3c3c3c;width: 100%;height: 100%;">
+            <tr>
+                <td>
+                    <button onclick="buttonTabClick()">Tab</button>
+                </td>
+                <td>
+                    <button onclick="buttonCurlyBracesClick()">{}</button>
+                </td>
+                <td>
+                    <button onclick="buttonQuoteClick()">""</button>
+                </td>
+                <td>
+                    <button onclick="buttonSemicolonClick()">;</button>
+                </td>
+                <td>
+                    <button style="transform: scale(1,-1);" onclick="buttonUndoCLick()">↩</button>
+                </td>
+                <td>
+                    <button onclick="buttonUpArrowClick()">⇑</button>
+                </td>
+                <td>
+                    <button style="transform: scale(-1, -1);" onclick="buttonRedoClick()">↩</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button onclick="buttonEqualClick()">=</button>
+                </td>
+                <td>
+                    <button onclick="buttonBackSlashClick()">\</button>
+                </td>
+                <td>
+                    <button onclick="buttonAmpersandClick()">&</button>
+                </td>
+                <td>
+                    <button onclick="buttonCommaClick()">,</button>
+                </td>
+                <td>
+                    <button onclick="buttonLeftArrowClick()">⇐</button>
+                </td>
+                <td>
+                    <button onclick="buttonDownArrowClick()">⇓</button>
+                </td>
+                <td>
+                    <button onclick="buttonRightArrowClick()">⇒</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
     <script>
         let socket;
         try {
@@ -113,13 +226,8 @@
         } catch (error) {
             alert(error);
         }
-
-        socket.onopen = (event) => {
-            console.log('Connected to socket server');
-        };
-
         var editor;
-        require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' } });
+        require.config({ paths: { 'vs': 'node_modules/monaco-editor/min/vs' } });
         require(['vs/editor/editor.main'], function () {
             monaco.languages.register({ id: 'cpp' });
             monaco.languages.setLanguageConfiguration('cpp', {
@@ -128,106 +236,7 @@
             });
 
             // Define your list of keywords
-            var keywords = [
-                "include",
-                "int",
-                "void",
-                "main",
-                "cin",
-                "cout",
-                "endl",
-                "if",
-                "else",
-                "for",
-                "while",
-                "return",
-                "const",
-                "class",
-                "public",
-                "private",
-                "protected",
-                "struct",
-                "new",
-                "delete",
-                "switch",
-                "case",
-                "break",
-                "continue",
-                "bool",
-                "true",
-                "false",
-                "typedef",
-                "enum",
-                "namespace",
-                "template",
-                "try",
-                "catch",
-                "throw",
-                "virtual",
-                "static",
-                "friend",
-                "const_cast",
-                "dynamic_cast",
-                "reinterpret_cast",
-                "static_cast",
-                "operator",
-                "sizeof",
-                "auto",
-                "nullptr",
-                "volatile",
-                "register",
-                "extern",
-                "union",
-                "volatile",
-                "mutable",
-                "default",
-                "inline",
-                "explicit",
-                "co_await",
-                "co_return",
-                "co_yield",
-                "noexcept",
-                "alignas",
-                "alignof",
-                "asm",
-                "atomic_cancel",
-                "atomic_commit",
-                "atomic_noexcept",
-                "char",
-                "short",
-                "long",
-                "double",
-                "float",
-                "wchar_t",
-                "char8_t",
-                "char16_t",
-                "char32_t",
-                "char",
-                "unsigned",
-                "signed",
-                "typeid",
-                "typename",
-                "constexpr",
-                "decltype",
-                "concept",
-                "consteval",
-                "constinit",
-                "synchronized",
-                "using",
-                "thread_local",
-                "requires",
-                "export",
-                "mutable",
-                "bitand",
-                "bitor",
-                "not",
-                "and",
-                "or",
-                "not_eq",
-                "and_eq",
-                "or_eq",
-                "xor",
-                "xor_eq"
+            var keywords = ["include", "int", "void", "main", "cin", "cout", "endl", "if", "else", "for", "while", "return", "const", "class", "public", "private", "protected", "struct", "new", "delete", "switch", "case", "break", "continue", "bool", "true", "false", "typedef", "enum", "namespace", "template", "try", "catch", "throw", "virtual", "static", "friend", "const_cast", "dynamic_cast", "reinterpret_cast", "static_cast", "operator", "sizeof", "auto", "nullptr", "volatile", "register", "extern", "union", "volatile", "mutable", "default", "inline", "explicit", "co_await", "co_return", "co_yield", "noexcept", "alignas", "alignof", "asm", "atomic_cancel", "atomic_commit", "atomic_noexcept", "char", "short", "long", "double", "float", "wchar_t", "char8_t", "char16_t", "char32_t", "char", "unsigned", "signed", "typeid", "typename", "constexpr", "decltype", "concept", "consteval", "constinit", "synchronized", "using", "thread_local", "requires", "export", "mutable", "bitand", "bitor", "not", "and", "or", "not_eq", "and_eq", "or_eq", "xor", "xor_eq"
             ];
 
             // This array represents an estimation of the most commonly used C++ keywords.
@@ -259,32 +268,123 @@
                 value: '// Write your code here\n',
                 language: 'cpp',
                 theme: 'vs-dark',
+                tabSize: 2,        // Set the default tab size
+                insertSpaces: true, // Set the default tab type to spaces
                 automaticLayout: true,
                 scrollbar: {
-                    // Subtle shadows to the left & top. Defaults to true.
-                    useShadows: false,
-                    // Render vertical arrows. Defaults to false.
-                    verticalHasArrows: true,
-                    // Render horizontal arrows. Defaults to false.
-                    horizontalHasArrows: true,
-                    // Render vertical scrollbar.
-                    // Accepted values: 'auto', 'visible', 'hidden'.
-                    // Defaults to 'auto'
                     vertical: "visible",
-                    // Render horizontal scrollbar.
-                    // Accepted values: 'auto', 'visible', 'hidden'.
-                    // Defaults to 'auto'
-                    horizontal: "visible",
+                    horizontal: "hidden",
                     verticalScrollbarSize: 10,
-                    horizontalScrollbarSize: 17,
-                    arrowSize: 30
+                    horizontalScrollbarSize: 10,
                 }
             });
         });
 
+        var editorContainer = document.getElementById("editor-container");
+        editorContainer.addEventListener("click", function (e) {
+            editor.focus();
+        });
+
+        // All button functions
+        function buttonTabClick() {
+            editor.trigger('keyboard', 'type', { text: '\t' });
+            editor.focus();
+        }
+
+        function buttonCurlyBracesClick() {
+            editor.trigger('keyboard', 'type', { text: '{' });
+            editor.focus();
+        }
+
+        function buttonQuoteClick() {
+            editor.trigger('keyboard', 'type', { text: '"' });
+            editor.focus();
+        }
+
+        function buttonSemicolonClick() {
+            editor.trigger('keyboard', 'type', { text: ';' });
+            editor.focus();
+        }
+
+        function buttonUndoCLick() {
+            editor.trigger('keyboard', 'undo', {});
+            editor.focus();
+        }
+
+        function buttonUpArrowClick() {
+            editor.trigger('keyboard', 'cursorUp', {});
+            editor.focus();
+        }
+
+        function buttonRedoClick() {
+            editor.trigger('keyboard', 'redo', {});
+            editor.focus();
+        }
+
+        function buttonDownArrowClick() {
+            editor.trigger('keyboard', 'cursorDown', {});
+            editor.focus();
+        }
+
+        function buttonEqualClick() {
+            editor.trigger('keyboard', 'type', { text: '=' });
+            editor.focus();
+        }
+
+        function buttonBackSlashClick() {
+            editor.trigger('keyboard', 'type', { text: '\\' });
+            editor.focus();
+        }
+
+        function buttonAmpersandClick() {
+            editor.trigger('keyboard', 'type', { text: '&' });
+            editor.focus();
+        }
+
+        function buttonCommaClick() {
+            editor.trigger('keyboard', 'type', { text: ',' });
+            editor.focus();
+        }
+
+        function buttonLeftArrowClick() {
+            editor.trigger('keyboard', 'cursorLeft', {});
+            editor.focus();
+        }
+
+        function buttonDownArrowClick() {
+            editor.trigger('keyboard', 'cursorDown', {});
+            editor.focus();
+        }
+
+        function buttonRightArrowClick() {
+            editor.trigger('keyboard', 'cursorRight', {});
+            editor.focus();
+        }
+
+        // All button functions finished
+
         function closeModal() {
             const modal = document.getElementById('myModal');
             modal.style.display = 'none';
+        }
+
+        socket.onopen = (event) => {
+            console.log('Connected to socket server');
+        };
+
+        const formatCode = async () => {
+            const formatCodeButton = document.getElementById('formatCodeButton');
+            formatCodeButton.innerHTML = 'Formatting...';
+            const code = editor.getValue();
+            const responseData = await fetch('https://code.jomakhata.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code })
+            }).then(response => response.json())
+            editor.setValue(responseData.code);
+            formatCodeButton.innerHTML = 'FORMAT CODE';
         }
 
         const submitCode = async () => {
@@ -327,6 +427,29 @@
             document.getElementById('codeInput').value = '';
             return false;
         }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var menuButton = document.getElementById("menuButton");
+            var menuContent = document.getElementById("menuContent");
+
+            menuButton.addEventListener("click", function () {
+                if (menuContent.style.display === "block") {
+                    menuContent.style.display = "none";
+                } else {
+                    menuContent.style.display = "block";
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var shellOutput = document.getElementById("shellOutput");
+            shellOutput.addEventListener("click", function () {
+                document.getElementById("codeInput").focus();
+            });
+        });
+
     </script>
 </body>
 
